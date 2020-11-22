@@ -1,0 +1,57 @@
+{
+    "version": "1.0.0",
+    "title": "What is the impact of deleting a Databricks cluster",
+    "description": "Check the impact of deleting a cluster",
+    "contributions": {  
+      "reliability": "high",
+      "security": "none",
+      "scalability": "none"
+    },
+    "tags": ["azure", "databricks", "cluster"],
+    "steady-state-hypothesis": {
+      "title": "Check if there are too many messages in the queue",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "azure-queue-storage-too-many-messages",
+          "tolerance": {
+            "type": "range",
+            "range": [0,5]
+          },
+          "provider": {
+            "type": "python",
+            "module": "chaosazure.queuestorage.probes",
+            "func": "too_many_messages",
+            "secrets": ["queuestorage"],
+            "arguments": {
+              "queue_name": "${queue_name}"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "reduce-cluster-max-workers",
+        "provider": {
+          "type": "python",
+          "module": "chaosazure.databricks.actions",
+          "func": "edit_cluster",
+          "secrets": ["databricks"],
+          "arguments": {
+            "cluster_name": "${cluster_name}",
+            "max_workers": 4
+          }
+        },
+        "pauses":{
+          "after": 20
+        }
+      },
+      {
+        "type": "probe",
+        "ref": "azure-queue-storage-too-many-messages"
+      }
+    ],
+    "rollbacks": []
+  }

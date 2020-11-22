@@ -144,7 +144,7 @@ def restart_machines(filter: str = None,
         group = m['resourceGroup']
         name = m['name']
         logger.debug("Restarting machine: {}".format(name))
-        client.virtual_machines.restart(group, name)
+        client.virtual_machines.begin_restart(group, name)
         machine_records.add(cleanse.machine(m))
 
     return machine_records.output_as_dict('resources')

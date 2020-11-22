@@ -1,0 +1,69 @@
+{
+    "version": "1.0.0",
+    "title": "What is the impact of deleting a Databricks cluster",
+    "description": "Check the impact of deleting a cluster",
+    "contributions": {  
+      "reliability": "high",
+      "security": "none",
+      "scalability": "none"
+    },
+    "tags": ["azure", "databricks", "cluster"],
+    "configuration": {
+      "cluster_name": "your cluster name",
+      "queue_name": "your queue name"
+    },
+    "secrets": {
+      "databricks": {
+        "url": "your databricks url",
+        "token": "your databricks access token"
+      },
+      "queuestorage": {
+        "connection_string": "your storage connection string"
+      }
+    },
+    "steady-state-hypothesis": {
+      "title": "Check if there are too many messages in the queue",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "azure-queue-storage-too-many-messages",
+          "tolerance": {
+            "type": "range",
+            "range": [0,5]
+          },
+          "provider": {
+            "type": "python",
+            "module": "chaosazure.queuestorage.probes",
+            "func": "count_visible_messages",
+            "secrets": ["queuestorage"],
+            "arguments": {
+              "queue_name": "${queue_name}"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "delete-databricks-cluster",
+        "provider": {
+          "type": "python",
+          "module": "chaosazure.databricks.actions",
+          "func": "permanent_delete_cluster",
+          "secrets": ["databricks"],
+          "arguments": {
+            "cluster_name": "${cluster_name}"
+          }
+        },
+        "pauses":{
+          "after": 600
+        }
+      },
+      {
+        "type": "probe",
+        "ref": "azure-queue-storage-too-many-messages"
+      }
+    ],
+    "rollbacks": []
+  }

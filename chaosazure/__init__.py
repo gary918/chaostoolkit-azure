@@ -47,7 +47,7 @@ def init_compute_management_client(
     with auth(secrets) as authentication:
         base_url = secrets.get('cloud').endpoints.resource_manager
         client = ComputeManagementClient(
-            credentials=authentication,
+            credential=authentication,
             subscription_id=configuration.get('subscription_id'),
             base_url=base_url)
 
@@ -99,6 +99,8 @@ def __load_exported_activities() -> List[DiscoveredActivities]:
     activities.extend(discover_actions("chaosazure.machine.actions"))
     activities.extend(discover_probes("chaosazure.machine.probes"))
     activities.extend(discover_actions("chaosazure.aks.actions"))
+    activities.extend(discover_actions("chaosazure.databricks.actions"))
+    activities.extend(discover_probes("chaosazure.databricks.probes"))
     activities.extend(discover_actions("chaosazure.vmss.actions"))
     activities.extend(discover_actions("chaosazure.webapp.actions"))
     activities.extend(discover_probes("chaosazure.webapp.probes"))

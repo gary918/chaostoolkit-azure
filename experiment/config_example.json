@@ -1,0 +1,17 @@
+{
+    "configuration": {
+        "cluster_name": "test-cluster",
+        "queue_name": "test-queue",
+        "job_id": "1",
+        "notebook_path": "xxx"
+    },
+    "secrets": {
+        "databricks": {
+          "url": "xxx",
+          "token": "xxx"
+        },
+        "queuestorage": {
+          "connection_string": "xxx"
+        }
+    }
+}

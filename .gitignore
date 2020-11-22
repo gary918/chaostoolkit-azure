@@ -106,3 +106,11 @@ junit-test-results.xml
 
 .vscode/
 .idea/
+
+# Project specific files
+.databrickscfg
+config_gary.json
+config.json
+credentials.json
+journal.json
+queue_rest.py

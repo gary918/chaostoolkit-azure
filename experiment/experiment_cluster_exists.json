@@ -1,0 +1,53 @@
+{
+    "version": "1.0.0",
+    "title": "What is the impact of deleting a Databricks cluster",
+    "description": "Check the impact of deleting a cluster",
+    "contributions": {  
+      "reliability": "high",
+      "security": "none",
+      "scalability": "none"
+    },
+    "tags": ["azure", "databricks", "cluster"],
+    "steady-state-hypothesis": {
+      "title": "The Azure Databricks cluster exists",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "azure-databricks-cluster-exists",
+          "tolerance": true,
+          "provider": {
+            "type": "python",
+            "module": "chaosazure.databricks.probes",
+            "func": "cluster_exists",
+            "secrets": ["databricks"],
+            "arguments": {
+              "cluster_name": "${cluster_name}"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "delete-databricks-cluster",
+        "provider": {
+          "type": "python",
+          "module": "chaosazure.databricks.actions",
+          "func": "permanent_delete_cluster",
+          "secrets": ["databricks"],
+          "arguments": {
+            "cluster_name": "${cluster_name}"
+          }
+        },
+        "pauses":{
+          "after": 20
+        }
+      },
+      {
+        "type": "probe",
+        "ref": "azure-databricks-cluster-exists"
+      }
+    ],
+    "rollbacks": []
+  }

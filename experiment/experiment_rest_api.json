@@ -1,0 +1,66 @@
+{
+    "version": "1.0.0",
+    "title": "What is the impact of deleting a Databricks cluster",
+    "description": "My first experiment",
+    "contributions": {  
+      "reliability": "high",
+      "security": "none",
+      "scalability": "none"
+    },
+    "tags": ["azure", "databricks", "cluster"],
+    "steady-state-hypothesis": {
+      "title": "The Azure Databricks cluster exists",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "azure-databricks-cluster-exists",
+          "tolerance": true,
+          "provider": {
+            "type": "python",
+            "module": "chaosazure.databricks.probes",
+            "func": "cluster_exists",
+            "secrets": ["databricks"],
+            "arguments": {
+              "cluster_name": "${cluster_name}"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "start-databricks-cluster",
+        "provider": {
+          "type": "http",
+          "secrets": ["databricks"],
+          "url": "${url}/api/2.0/clusters/start",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer ${token}"
+          },
+          "arguments": {
+            "cluster_id": "${cluster_id}"
+          }
+        },
+        "pauses":{
+          "after": 10
+        }
+      },
+      {
+        "type": "probe",
+        "name": "check-cluster-status",
+        "provider": {
+          "type": "http",
+          "secrets": ["databricks"],
+          "url": "${url}/api/2.0/clusters/get?cluster_id=${cluster_id}",
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer ${token}"
+          }
+        }
+      }
+    ],
+    "rollbacks": []
+  }

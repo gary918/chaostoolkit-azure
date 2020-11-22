@@ -1,0 +1,45 @@
+{
+    "version": "1.0.0",
+    "title": "Experiment1",
+    "description": "My first experiment",
+    "tags": ["azure", "kubernetes", "aks", "node"],
+    "configuration": {
+      "azure_subscription_id": "xxx"
+    },
+    "secrets": {
+      "azure": {
+        "client_id": "xxx",
+        "client_secret": "xxx",
+        "tenant_id": "xxx",
+        "azure_cloud": "AZURE_PUBLIC_CLOUD"
+      }
+    },
+    "steady-state-hypothesis": {
+      "title": "Services are all available and healthy",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "consumer-service-must-still-respond",
+          "tolerance": 200,
+          "provider": {
+            "type": "http",
+            "url": "https://adb-7259715587085061.1.azuredatabricks.net"
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "restart-node-at-random",
+        "provider": {
+          "type": "python",
+          "module": "chaosazure.machine.actions",
+          "func": "restart_machines",
+          "secrets": ["azure"],
+          "config": ["azure_subscription_id"]
+        }
+      }
+    ],
+    "rollbacks": []
+  }

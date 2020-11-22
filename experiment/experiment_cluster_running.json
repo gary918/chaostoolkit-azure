@@ -1,0 +1,53 @@
+{
+    "version": "1.0.0",
+    "title": "Experiment1",
+    "description": "My first experiment",
+    "contributions": {  
+      "reliability": "high",
+      "security": "none",
+      "scalability": "none"
+    },
+    "tags": ["azure", "databricks", "cluster"],
+    "steady-state-hypothesis": {
+      "title": "The cluster is running",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "azure-databricks-cluster-running",
+          "tolerance": "RUNNING",
+          "provider": {
+            "type": "python",
+            "module": "chaosazure.databricks.probes",
+            "func": "get_cluster_status",
+            "secrets": ["databricks"],
+            "arguments": {
+              "cluster_id": "${cluster_id}"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "terminate-databricks-cluster",
+        "provider": {
+          "type": "python",
+          "module": "chaosazure.databricks.actions",
+          "func": "terminate_cluster",
+          "secrets": ["databricks"],
+          "arguments": {
+            "cluster_id": "${cluster_id}"
+          }
+        },
+        "pauses":{
+          "after": 10
+        }
+      },
+      {
+        "type": "probe",
+        "ref": "azure-databricks-cluster-running"
+      }
+    ],
+    "rollbacks": []
+  }
